@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import {
   MapContainer,
@@ -7,6 +7,7 @@ import {
   Tooltip,
   Popup,
   Marker,
+  useMapEvents,
 } from "react-leaflet";
 import "./App.css";
 import { statesData } from "./data";
@@ -19,6 +20,28 @@ import "leaflet/dist/leaflet.css";
 
 https://react-leaflet.js.org/docs/api-map/
  */
+
+function LocationMarker() {
+  const [position, setPosition] = useState(null);
+  const map = useMapEvents({
+    click() {
+      map.locate();
+    },
+    locationfound(e) {
+      setPosition(e.latlng);
+      map.flyTo(e.latlng, map.getZoom());
+    },
+  });
+
+  // console.log(position)
+  // get that position for ex. [40, 40]
+  // add in backend
+  return position === null ? null : (
+    <Marker position={position}>
+      <Popup>You are here</Popup>
+    </Marker>
+  );
+}
 
 function App() {
   const center = [40.63463151377654, -97.89969605983609];
@@ -52,6 +75,7 @@ function App() {
           url="https://api.maptiler.com/maps/basic-v2/256/{z}/{x}/{y}.png?key=NXYqFx4vIix4Ixh8KlN6"
           attribution='<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
         />
+
         {statesData.features.map((state) => {
           const coordinates = state.geometry.coordinates[0];
           const stateName = state.properties.name;
@@ -99,6 +123,7 @@ function App() {
             </Polygon>
           );
         })}
+        <LocationMarker />
       </MapContainer>
     </div>
   );
